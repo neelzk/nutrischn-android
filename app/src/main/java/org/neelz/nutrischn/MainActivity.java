@@ -11,11 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
-import android.view.Menu;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.EditText;
 
@@ -28,13 +28,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+    private final String logTag = "NutrischnTag";
 
     EditText edActualProtein;
     EditText edActualFat;
     EditText edActualCarbs;
     EditText edActualkCal;
 
+    EditText edName;
     EditText edNewProtein;
     EditText edNewFat;
     EditText edNewCarbs;
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         edActualProtein = (EditText) findViewById(R.id.edActualProtein);
         edActualkCal = (EditText) findViewById(R.id.edActualkCal);
 
+        edName = (EditText) findViewById(R.id.edName);
         edNewFat = (EditText) findViewById(R.id.edNewFat);
         edNewCarbs = (EditText) findViewById(R.id.edNewCarbs);
         edNewProtein = (EditText) findViewById(R.id.edNewProtein);
@@ -165,17 +168,17 @@ public class MainActivity extends AppCompatActivity {
         edMenge.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
-            EditText edView = (EditText) view;
-            if (hasFocus) {
-                String mengeStr = edView.getText().toString();
-                if (mengeStr.equals("100") || mengeStr.equals("0")) {
-                    edView.setText("");
+                EditText edView = (EditText) view;
+                if (hasFocus) {
+                    String mengeStr = edView.getText().toString();
+                    if (mengeStr.equals("100") || mengeStr.equals("0")) {
+                        edView.setText("");
+                    }
+                } else {
+                    if (edView.getText().toString().isEmpty()) {
+                        edView.setText("100");
+                    }
                 }
-            } else {
-                if (edView.getText().toString().isEmpty()) {
-                    edView.setText("100");
-                }
-            }
             }
         });
         edMenge.setOnEditorActionListener(new EditText.OnEditorActionListener() {
@@ -183,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    Log.d("tag", "Edit done");
+                    Log.d(logTag, "Edit done");
                     calcTempCalories();
                 }
                 return false;
@@ -197,35 +200,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.fab_clear).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onClearClicked();
-            }
-        });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return true;
-        return false;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+//        findViewById(R.id.fab_clear).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                onClearClicked();
+//            }
+//        });
     }
 
     @Override
@@ -253,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         String carbsEnteredStr = edNewCarbs.getText().toString();
 
         if (proteinEnteredStr.equals("0") && fatEnteredStr.equals("0") && carbsEnteredStr.equals("0")) {
-            Log.d("tag", "entered = 0");
+            Log.d(logTag, "entered = 0");
             return;
         }
 
@@ -266,18 +246,21 @@ public class MainActivity extends AppCompatActivity {
         // multiply by 10 to get from milligrams to grams per 100 grams
         try {
             fat_entered += Double.parseDouble(fatEnteredStr) * menge * 10.0;
-            result += "F: " + String.format("%.1f", ((double)fat_entered)/1000.0);
-        } catch (NumberFormatException e) { }
+            result += "F: " + String.format("%.1f", ((double) fat_entered) / 1000.0);
+        } catch (NumberFormatException e) {
+        }
 
         try {
             carbs_entered += Double.parseDouble(carbsEnteredStr) * menge * 10.0;
-            result += "  C: " + String.format("%.1f", ((float)carbs_entered)/1000.0);
-        } catch (NumberFormatException e) { }
+            result += "  C: " + String.format("%.1f", ((float) carbs_entered) / 1000.0);
+        } catch (NumberFormatException e) {
+        }
 
         try {
             protein_entered += Double.parseDouble(proteinEnteredStr) * menge * 10.0;
-            result += "  P: " + String.format("%.1f", ((float)protein_entered)/1000.0);
-        } catch (NumberFormatException e) { }
+            result += "  P: " + String.format("%.1f", ((float) protein_entered) / 1000.0);
+        } catch (NumberFormatException e) {
+        }
 
         int kCal = ((protein_entered + carbs_entered) * 4 + fat_entered * 9) / 1000;
 
@@ -314,15 +297,18 @@ public class MainActivity extends AppCompatActivity {
         // multiply by 10 to get from milligrams to grams per 100 grams
         try {
             m_fat += Double.parseDouble(fatEntered) * menge * 10.0;
-        } catch (NumberFormatException e) { }
+        } catch (NumberFormatException e) {
+        }
 
         try {
             m_carbs += Double.parseDouble(carbsEntered) * menge * 10.0;
-        } catch (NumberFormatException e) { }
+        } catch (NumberFormatException e) {
+        }
 
         try {
             m_protein += Double.parseDouble(proteinEntered) * menge * 10.0;
-        } catch (NumberFormatException e) { }
+        } catch (NumberFormatException e) {
+        }
 
         View view = MainActivity.this.getCurrentFocus();
         if (view != null) {
@@ -339,9 +325,9 @@ public class MainActivity extends AppCompatActivity {
         int carbsGrams = m_carbs / 1000;
         int proteinGrams = m_protein / 1000;  // e.g. protein=120345 -> proteinGrams = 120
 
-        int fatRemainingMillis = (m_fat - 1000*fatGrams);
-        int carbsRemainingMillis = (m_carbs - 1000*carbsGrams);
-        int proteinRemainingMillis = (m_protein - 1000*proteinGrams);
+        int fatRemainingMillis = (m_fat - 1000 * fatGrams);
+        int carbsRemainingMillis = (m_carbs - 1000 * carbsGrams);
+        int proteinRemainingMillis = (m_protein - 1000 * proteinGrams);
 
         edActualFat.setText("" + fatGrams + "," + String.format("%03d", fatRemainingMillis));
         edActualCarbs.setText("" + carbsGrams + "," + String.format("%03d", carbsRemainingMillis));
@@ -351,17 +337,76 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void onClearClicked() {
+    private void clearValues() {
         new AlertDialog.Builder(this)
-            .setMessage("Alles auf 0?")
-            .setNegativeButton(android.R.string.no, null)
-            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setMessage("Alles auf 0?")
+                .setNegativeButton(android.R.string.no, null)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
-                public void onClick(DialogInterface arg0, int arg1) {
-                    m_protein = m_fat = m_carbs = 0;
-                    setActualValues();
-                }
-            }).create().show();
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        m_protein = m_fat = m_carbs = 0;
+                        setActualValues();
+                    }
+                }).create().show();
+    }
+
+    private void saveMeal() {
+        Log.d(logTag, "TODO: implement onSaveMeal");
+        int len = m_mealsNames.length;
+        if (len != m_mealsF.length ||
+                len != m_mealsC.length ||
+                len != m_mealsP.length) {
+            Log.d(logTag, "String lengths do not match");
+            return;
+        }
+
+        String[] newMealsNames = new String[len + 1];
+        String[] newMealsF = new String[len + 1];
+        String[] newMealsC = new String[len + 1];
+        String[] newMealsP = new String[len + 1];
+
+        String newMealName = edName.getText().toString();
+        if (newMealName.isEmpty()) {
+            return;
+        }
+
+        String resYaml = "";
+        for (int i = 0; i < len; ++i) {
+            if (newMealName.equals(m_mealsNames[i])) {
+                return;
+            }
+            newMealsNames[i] = m_mealsNames[i];
+            newMealsF[i] = m_mealsF[i];
+            newMealsC[i] = m_mealsC[i];
+            newMealsP[i] = m_mealsP[i];
+
+            resYaml += "- 'n': " + m_mealsNames[i] + "\n";
+            resYaml += "  f: '" + m_mealsF[i] + "'\n";
+            resYaml += "  c: '" + m_mealsC[i] + "'\n";
+            resYaml += "  p: '" + m_mealsP[i] + "'\n";
+        }
+
+        edName.clearFocus();
+        edNewFat.clearFocus();
+        edNewCarbs.clearFocus();
+        edNewProtein.clearFocus();
+
+        newMealsNames[len] = edName.getText().toString();
+        newMealsF[len] = edNewFat.getText().toString();
+        newMealsC[len] = edNewCarbs.getText().toString();
+        newMealsP[len] = edNewProtein.getText().toString();
+
+        m_mealsNames = newMealsNames;
+        m_mealsF = newMealsF;
+        m_mealsC = newMealsC;
+        m_mealsP = newMealsP;
+
+        resYaml += "- 'n': " + newMealsNames[len] + "\n";
+        resYaml += "  f: '" + newMealsF[len] + "'\n";
+        resYaml += "  c: '" + newMealsC[len] + "'\n";
+        resYaml += "  p: '" + newMealsP[len] + "'\n";
+
+        Log.d(logTag, resYaml);
     }
 
     private void onSelectMealClicked() {
@@ -370,23 +415,25 @@ public class MainActivity extends AppCompatActivity {
         builder.setSingleChoiceItems(m_mealsNames, -1, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, final int id) {
-            m_mealChoice = id;
+                m_mealChoice = id;
             }
         });
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, final int id) {
-            if (m_mealChoice != -1) {
-                edNewFat.setText(m_mealsF[m_mealChoice]);
-                edNewCarbs.setText(m_mealsC[m_mealChoice]);
-                edNewProtein.setText(m_mealsP[m_mealChoice]);
-            }
+                if (m_mealChoice != -1) {
+                    edName.setText(m_mealsNames[m_mealChoice]);
+                    edNewFat.setText(m_mealsF[m_mealChoice]);
+                    edNewCarbs.setText(m_mealsC[m_mealChoice]);
+                    edNewProtein.setText(m_mealsP[m_mealChoice]);
+                }
             }
         });
         builder.setNegativeButton("Nullen", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
+                edName.setText("");
                 edNewFat.setText("0");
                 edNewCarbs.setText("0");
                 edNewProtein.setText("0");
@@ -407,4 +454,26 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
+    public void onOptionClicked(View view) {
+        PopupMenu popup = new PopupMenu(this, view);
+        // This activity implements OnMenuItemClickListener
+        popup.setOnMenuItemClickListener((PopupMenu.OnMenuItemClickListener) this);
+        popup.inflate(R.menu.menu_main);
+        popup.show();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_reset:
+                clearValues();
+                return true;
+            case R.id.action_savemeal:
+                saveMeal();
+                return true;
+        }
+
+        return false;
+    }
 }

@@ -7,17 +7,45 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tvName"
         android:layout_width="80dp"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginTop="32dp"
         android:gravity="center"
-        android:text="Fett" />
+        android:text="Name" />
+
+    <EditText
+        android:id="@+id/edName"
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:layout_marginStart="80dp"
+        android:layout_marginEnd="50dp"
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:text=""
+        app:layout_constraintStart_toEndOf="@+id/tvName"
+        app:layout_constraintTop_toTopOf="@+id/tvName" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/edName"
+        android:onClick="onOptionClicked"
+        android:src="@android:drawable/ic_menu_more"
+        tools:ignore="OnClick" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="80dp"
+        android:layout_height="42dp"
+        android:gravity="center"
+        android:text="Fett"
+        app:layout_constraintTop_toBottomOf="@+id/tvName" />
 
     <EditText
         android:id="@+id/edNewFat"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginStart="80dp"
         android:imeOptions="actionDone"
         android:inputType="numberDecimal"
@@ -28,7 +56,7 @@
     <TextView
         android:id="@+id/textView2"
         android:layout_width="80dp"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:gravity="center"
         android:text="Kohlen"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
@@ -36,7 +64,7 @@
     <EditText
         android:id="@+id/edNewCarbs"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginStart="80dp"
         android:imeOptions="actionDone"
         android:inputType="numberDecimal"
@@ -47,7 +75,7 @@
     <TextView
         android:id="@+id/textView3"
         android:layout_width="80dp"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:gravity="center"
         android:text="Protein"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
@@ -55,7 +83,7 @@
     <EditText
         android:id="@+id/edNewProtein"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginStart="80dp"
         android:imeOptions="actionDone"
         android:inputType="numberDecimal"
@@ -66,7 +94,7 @@
     <TextView
         android:id="@+id/textView4"
         android:layout_width="80dp"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:gravity="center"
         android:text="Menge"
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
@@ -74,10 +102,10 @@
     <EditText
         android:id="@+id/edMenge"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginStart="80dp"
         android:imeOptions="actionDone"
-        android:inputType="numberSigned"
+        android:inputType="numberSigned|numberDecimal"
         android:text="100"
         app:layout_constraintStart_toEndOf="@+id/textView4"
         app:layout_constraintTop_toTopOf="@+id/textView4" />
@@ -85,7 +113,7 @@
     <TextView
         android:id="@+id/textView9"
         android:layout_width="80dp"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:gravity="center"
         android:text="Auswirkung"
         app:layout_constraintTop_toBottomOf="@+id/textView4" />
@@ -93,7 +121,7 @@
     <EditText
         android:id="@+id/edKcalNew"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginStart="80dp"
         android:enabled="false"
         android:imeOptions="actionDone"
@@ -105,7 +133,7 @@
     <TextView
         android:id="@+id/textView7"
         android:layout_width="80dp"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:gravity="center"
         android:text="Protein"
         app:layout_constraintTop_toBottomOf="@+id/textView6" />
@@ -113,7 +141,7 @@
     <EditText
         android:id="@+id/edActualProtein"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginStart="80dp"
         android:enabled="false"
         android:inputType="numberDecimal"
@@ -125,7 +153,7 @@
     <TextView
         android:id="@+id/textView5"
         android:layout_width="80dp"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginTop="90dp"
         android:gravity="center"
         android:text="Fett"
@@ -134,7 +162,7 @@
     <EditText
         android:id="@+id/edActualFat"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginStart="80dp"
         android:enabled="false"
         android:inputType="numberDecimal"
@@ -145,7 +173,7 @@
     <TextView
         android:id="@+id/textView6"
         android:layout_width="80dp"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:gravity="center"
         android:text="Kohlen"
         app:layout_constraintTop_toBottomOf="@+id/textView5" />
@@ -153,7 +181,7 @@
     <EditText
         android:id="@+id/edActualCarbs"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginStart="80dp"
         android:enabled="false"
         android:inputType="numberDecimal"
@@ -164,7 +192,7 @@
     <TextView
         android:id="@+id/textView8"
         android:layout_width="80dp"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:gravity="center"
         android:text="kcal"
         app:layout_constraintTop_toBottomOf="@+id/textView7" />
@@ -172,7 +200,7 @@
     <EditText
         android:id="@+id/edActualkCal"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:layout_marginStart="80dp"
         android:enabled="false"
         android:inputType="numberDecimal"
@@ -202,6 +230,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView9"
         app:srcCompat="@android:drawable/ic_menu_agenda" />
 
+    <!--
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_clear"
         android:layout_width="wrap_content"
@@ -212,6 +241,7 @@
         app:layout_constraintStart_toStartOf="@+id/textView8"
         app:layout_constraintTop_toBottomOf="@+id/textView8"
         app:srcCompat="@android:drawable/ic_menu_delete" />
+    -->
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
