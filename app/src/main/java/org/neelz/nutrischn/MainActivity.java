@@ -27,6 +27,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
     private final String logTag = "NutrischnTag";
@@ -48,10 +49,22 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     boolean m_valuesChanged = false;
 
-    String[] m_mealsNames;
-    String[] m_mealsF;
-    String[] m_mealsC;
-    String[] m_mealsP;
+    private class MealValues {
+        String name;
+        String fat;
+        String carbs;
+        String protein;
+    }
+
+    ArrayList<MealValues> m_mealValues;
+
+    private CharSequence[] getMealNames() {
+        CharSequence[] ret = new CharSequence[m_mealValues.size()];
+        for (int i = 0; i < m_mealValues.size(); ++i) {
+            ret[i] = m_mealValues.get(i).name;
+        }
+        return ret;
+    }
 
     String m_json;
     JSONArray m_mealsJson;
@@ -75,32 +88,32 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         try {
             m_mealsJson = new JSONArray(json);
-            m_mealsNames = new String[m_mealsJson.length()];
-            m_mealsF = new String[m_mealsJson.length()];
-            m_mealsC = new String[m_mealsJson.length()];
-            m_mealsP = new String[m_mealsJson.length()];
+            m_mealValues = new ArrayList<MealValues>();
+
             for (int i = 0; i < m_mealsJson.length(); ++i) {
+                MealValues mv = new MealValues();
                 JSONObject mealObj = m_mealsJson.getJSONObject(i);
                 try {
-                    m_mealsNames[i] = mealObj.getString("n");
+                    mv.name = mealObj.getString("n");
                 } catch (JSONException e5) {
-                    m_mealsNames[i] = "Unknown";
+                    mv.name = "Unkown";
                 }
                 try {
-                    m_mealsF[i] = mealObj.getString("f");
+                    mv.fat = mealObj.getString("f");
                 } catch (JSONException e2) {
-                    m_mealsF[i] = "0.0";
+                    mv.fat = "0.0";
                 }
                 try {
-                    m_mealsC[i] = mealObj.getString("c");
+                    mv.carbs = mealObj.getString("c");
                 } catch (JSONException e3) {
-                    m_mealsC[i] = "0.0";
+                    mv.carbs = "0.0";
                 }
                 try {
-                    m_mealsP[i] = mealObj.getString("p");
+                    mv.protein = mealObj.getString("p");
                 } catch (JSONException e4) {
-                    m_mealsP[i] = "0.0";
+                    mv.protein = "0.0";
                 }
+                m_mealValues.add(mv);
             }
         } catch (JSONException e) {
         }
@@ -136,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             @Override
             public void onClick(View view) {
                 EditText edView = (EditText) view;
-                if (edView.getText().toString().equals("0")) {
+                if (edView.getText().toString().equals("0") || view.getId() == R.id.edName) {
                     edView.setText("");
                 }
             }
@@ -161,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         edNewFat.setOnClickListener(edMacroClickListener);
         edNewCarbs.setOnClickListener(edMacroClickListener);
         edNewProtein.setOnClickListener(edMacroClickListener);
+        edName.setOnClickListener(edMacroClickListener);
 
         edNewFat.setOnFocusChangeListener(edMacroFocusListener);
         edNewCarbs.setOnFocusChangeListener(edMacroFocusListener);
@@ -351,68 +365,47 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     private void saveMeal() {
-        Log.d(logTag, "TODO: implement onSaveMeal");
-        int len = m_mealsNames.length;
-        if (len != m_mealsF.length ||
-                len != m_mealsC.length ||
-                len != m_mealsP.length) {
-            Log.d(logTag, "String lengths do not match");
-            return;
-        }
-
-        String[] newMealsNames = new String[len + 1];
-        String[] newMealsF = new String[len + 1];
-        String[] newMealsC = new String[len + 1];
-        String[] newMealsP = new String[len + 1];
-
-        String newMealName = edName.getText().toString();
-        if (newMealName.isEmpty()) {
-            return;
-        }
-
-        String resYaml = "";
-        for (int i = 0; i < len; ++i) {
-            if (newMealName.equals(m_mealsNames[i])) {
-                return;
-            }
-            newMealsNames[i] = m_mealsNames[i];
-            newMealsF[i] = m_mealsF[i];
-            newMealsC[i] = m_mealsC[i];
-            newMealsP[i] = m_mealsP[i];
-
-            resYaml += "- 'n': " + m_mealsNames[i] + "\n";
-            resYaml += "  f: '" + m_mealsF[i] + "'\n";
-            resYaml += "  c: '" + m_mealsC[i] + "'\n";
-            resYaml += "  p: '" + m_mealsP[i] + "'\n";
-        }
-
         edName.clearFocus();
         edNewFat.clearFocus();
         edNewCarbs.clearFocus();
         edNewProtein.clearFocus();
 
-        newMealsNames[len] = edName.getText().toString();
-        newMealsF[len] = edNewFat.getText().toString();
-        newMealsC[len] = edNewCarbs.getText().toString();
-        newMealsP[len] = edNewProtein.getText().toString();
+        MealValues newMv = new MealValues();
+        String newMealName = edName.getText().toString();
+        if (newMealName.isEmpty()) {
+            return;
+        }
 
-        m_mealsNames = newMealsNames;
-        m_mealsF = newMealsF;
-        m_mealsC = newMealsC;
-        m_mealsP = newMealsP;
+        newMv.name = newMealName;
+        newMv.fat = edNewFat.getText().toString();
+        newMv.carbs = edNewCarbs.getText().toString();
+        newMv.protein = edNewProtein.getText().toString();
 
-        resYaml += "- 'n': " + newMealsNames[len] + "\n";
-        resYaml += "  f: '" + newMealsF[len] + "'\n";
-        resYaml += "  c: '" + newMealsC[len] + "'\n";
-        resYaml += "  p: '" + newMealsP[len] + "'\n";
+        m_mealValues.add(newMv);
+    }
 
-        Log.d(logTag, resYaml);
+    private void buildYaml() {
+//        String resYaml = "";
+//        for (int i = 0; i < len; ++i) {
+//            if (newMealName.equals(m_mealsNames[i])) {
+//                return;
+//            }
+//            newMealsNames[i] = m_mealsNames[i];
+//            newMealsF[i] = m_mealsF[i];
+//            newMealsC[i] = m_mealsC[i];
+//            newMealsP[i] = m_mealsP[i];
+//
+//            resYaml += "- 'n': " + m_mealsNames[i] + "\n";
+//            resYaml += "  f: '" + m_mealsF[i] + "'\n";
+//            resYaml += "  c: '" + m_mealsC[i] + "'\n";
+//            resYaml += "  p: '" + m_mealsP[i] + "'\n";
+//        }
     }
 
     private void onSelectMealClicked() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setSingleChoiceItems(m_mealsNames, -1, new DialogInterface.OnClickListener() {
+        builder.setSingleChoiceItems(getMealNames(), -1, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, final int id) {
                 m_mealChoice = id;
@@ -423,10 +416,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             @Override
             public void onClick(DialogInterface dialog, final int id) {
                 if (m_mealChoice != -1) {
-                    edName.setText(m_mealsNames[m_mealChoice]);
-                    edNewFat.setText(m_mealsF[m_mealChoice]);
-                    edNewCarbs.setText(m_mealsC[m_mealChoice]);
-                    edNewProtein.setText(m_mealsP[m_mealChoice]);
+                    edName.setText(m_mealValues.get(m_mealChoice).name);
+                    edNewFat.setText(m_mealValues.get(m_mealChoice).fat);
+                    edNewCarbs.setText(m_mealValues.get(m_mealChoice).carbs);
+                    edNewProtein.setText(m_mealValues.get(m_mealChoice).protein);
                 }
             }
         });
