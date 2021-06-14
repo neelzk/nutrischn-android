@@ -7,15 +7,16 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.os.Environment;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.EditText;
 
@@ -29,7 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+public class MainActivity extends AppCompatActivity {
     private final String logTag = "NutrischnTag";
 
     EditText edActualProtein;
@@ -75,6 +76,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_fragment);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         File docDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
         File file = new File(docDir, "nutvalues.yaml");
@@ -138,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         setActualValues();
 
-        findViewById(R.id.fab_list).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_selectmeal).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onSelectMealClicked();
@@ -207,19 +211,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             }
         });
 
-        findViewById(R.id.fab_submit).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_trackmeal).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onEatClicked();
             }
         });
-
-//        findViewById(R.id.fab_clear).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                onClearClicked();
-//            }
-//        });
     }
 
     @Override
@@ -228,6 +225,25 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         if (m_valuesChanged) {
             saveValues();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_reset:
+                clearValues();
+                return true;
+            case R.id.action_savemeal:
+                saveMeal();
+                return true;
+        }
+        return false;
     }
 
     private void calcTempCalories() {
@@ -261,18 +277,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         try {
             fat_entered += Double.parseDouble(fatEnteredStr) * menge * 10.0;
             result += "F: " + String.format("%.1f", ((double) fat_entered) / 1000.0);
-        } catch (NumberFormatException e) {
-        }
 
-        try {
             carbs_entered += Double.parseDouble(carbsEnteredStr) * menge * 10.0;
             result += "  C: " + String.format("%.1f", ((float) carbs_entered) / 1000.0);
-        } catch (NumberFormatException e) {
-        }
 
-        try {
             protein_entered += Double.parseDouble(proteinEnteredStr) * menge * 10.0;
             result += "  P: " + String.format("%.1f", ((float) protein_entered) / 1000.0);
+
         } catch (NumberFormatException e) {
         }
 
@@ -311,15 +322,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         // multiply by 10 to get from milligrams to grams per 100 grams
         try {
             m_fat += Double.parseDouble(fatEntered) * menge * 10.0;
-        } catch (NumberFormatException e) {
-        }
-
-        try {
             m_carbs += Double.parseDouble(carbsEntered) * menge * 10.0;
-        } catch (NumberFormatException e) {
-        }
-
-        try {
             m_protein += Double.parseDouble(proteinEntered) * menge * 10.0;
         } catch (NumberFormatException e) {
         }
@@ -349,7 +352,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         edActualkCal.setText("" + kCal);
         m_valuesChanged = true;
     }
-
 
     private void clearValues() {
         new AlertDialog.Builder(this)
@@ -382,24 +384,20 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         newMv.protein = edNewProtein.getText().toString();
 
         m_mealValues.add(newMv);
+
+        Log.d(logTag, buildYaml());
     }
 
-    private void buildYaml() {
-//        String resYaml = "";
-//        for (int i = 0; i < len; ++i) {
-//            if (newMealName.equals(m_mealsNames[i])) {
-//                return;
-//            }
-//            newMealsNames[i] = m_mealsNames[i];
-//            newMealsF[i] = m_mealsF[i];
-//            newMealsC[i] = m_mealsC[i];
-//            newMealsP[i] = m_mealsP[i];
-//
-//            resYaml += "- 'n': " + m_mealsNames[i] + "\n";
-//            resYaml += "  f: '" + m_mealsF[i] + "'\n";
-//            resYaml += "  c: '" + m_mealsC[i] + "'\n";
-//            resYaml += "  p: '" + m_mealsP[i] + "'\n";
-//        }
+    private String buildYaml() {
+        String resYaml = "";
+        for (MealValues mv : m_mealValues) {
+            resYaml += "- 'n': " + mv.name + "\n";
+            resYaml += "  f: '" + mv.fat + "'\n";
+            resYaml += "  c: '" + mv.carbs + "'\n";
+            resYaml += "  p: '" + mv.protein + "'\n";
+        }
+
+        return resYaml;
     }
 
     private void onSelectMealClicked() {
@@ -444,29 +442,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         editor.putInt("fat", m_fat);
         editor.putInt("carbs", m_carbs);
         editor.putInt("protein", m_protein);
-        editor.commit();
+        editor.apply();
+        m_valuesChanged = false;
     }
 
-    public void onOptionClicked(View view) {
-        PopupMenu popup = new PopupMenu(this, view);
-        // This activity implements OnMenuItemClickListener
-        popup.setOnMenuItemClickListener((PopupMenu.OnMenuItemClickListener) this);
-        popup.inflate(R.menu.menu_main);
-        popup.show();
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.action_reset:
-                clearValues();
-                return true;
-            case R.id.action_savemeal:
-                saveMeal();
-                return true;
-        }
-
-        return false;
-    }
 }
