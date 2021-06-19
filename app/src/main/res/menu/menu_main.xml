@@ -12,4 +12,14 @@
         android:orderInCategory="200"
         android:title="@string/action_savemeal"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_stashmacros"
+        android:orderInCategory="300"
+        android:title="@string/action_stashmacros"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_restoremacros"
+        android:orderInCategory="400"
+        android:title="@string/action_restoremacros"
+        app:showAsAction="never" />
 </menu>

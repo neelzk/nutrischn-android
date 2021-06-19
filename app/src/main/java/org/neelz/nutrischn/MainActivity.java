@@ -19,6 +19,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,9 +68,6 @@ public class MainActivity extends AppCompatActivity {
         return ret;
     }
 
-    String m_json;
-    JSONArray m_mealsJson;
-
     int m_mealChoice = -1;
 
     @Override
@@ -91,12 +89,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         try {
-            m_mealsJson = new JSONArray(json);
+            JSONArray mealsJson = new JSONArray(json);
             m_mealValues = new ArrayList<MealValues>();
 
-            for (int i = 0; i < m_mealsJson.length(); ++i) {
+            for (int i = 0; i < mealsJson.length(); ++i) {
                 MealValues mv = new MealValues();
-                JSONObject mealObj = m_mealsJson.getJSONObject(i);
+                JSONObject mealObj = mealsJson.getJSONObject(i);
                 try {
                     mv.name = mealObj.getString("n");
                 } catch (JSONException e5) {
@@ -242,6 +240,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_savemeal:
                 saveMeal();
                 return true;
+            case R.id.action_stashmacros:
+                stashMacros();
+                return true;
+            case R.id.action_restoremacros:
+                restoreMacros();
+                return true;
         }
         return false;
     }
@@ -356,8 +360,8 @@ public class MainActivity extends AppCompatActivity {
     private void clearValues() {
         new AlertDialog.Builder(this)
                 .setMessage("Alles auf 0?")
-                .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface arg0, int arg1) {
                         m_protein = m_fat = m_carbs = 0;
@@ -386,6 +390,33 @@ public class MainActivity extends AppCompatActivity {
         m_mealValues.add(newMv);
 
         Log.d(logTag, buildYaml());
+    }
+
+    private void stashMacros() {
+        SharedPreferences prefs = getSharedPreferences("pref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt("stashfat", m_fat);
+        editor.putInt("stashcarbs", m_carbs);
+        editor.putInt("stashprotein", m_protein);
+        editor.apply();
+        Toast.makeText(this, "Werte gespeichert", Toast.LENGTH_SHORT).show();
+    }
+
+    private void restoreMacros() {
+        SharedPreferences prefs = getSharedPreferences("pref", Context.MODE_PRIVATE);
+
+        int restoredFat = prefs.getInt("stashfat", 0);
+        int restoredCarbs = prefs.getInt("stashcarbs", 0);
+        int restoredProtein = prefs.getInt("stashprotein", 0);
+
+        if (restoredFat != 0 || restoredCarbs != 0 || restoredProtein != 0) {
+            m_fat = restoredFat;
+            m_carbs = restoredCarbs;
+            m_protein = restoredProtein;
+            setActualValues();
+        } else {
+            Toast.makeText(this, "Keine gespeicherten Werte gefunden", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private String buildYaml() {

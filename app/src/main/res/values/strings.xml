@@ -2,6 +2,8 @@
     <string name="app_name">Nutrischn</string>
     <string name="action_reset">Reset</string>
     <string name="action_savemeal">Lebensmittel speichern</string>
+    <string name="action_stashmacros">Makros speichern</string>
+    <string name="action_restoremacros">Makros wiederherstellen</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
