@@ -2,6 +2,7 @@
     <string name="app_name">Nutrischn</string>
     <string name="action_reset">Reset</string>
     <string name="action_savemeal">Lebensmittel speichern</string>
+    <string name="action_delmeal">Lebensmittel löschen</string>
     <string name="action_stashmacros">Makros speichern</string>
     <string name="action_restoremacros">Makros wiederherstellen</string>
     <!-- Strings used for fragments for navigation -->

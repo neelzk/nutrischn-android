@@ -4,8 +4,13 @@
     tools:context="org.neelz.nutrischn.MainActivity">
     <item
         android:id="@+id/action_savemeal"
-        android:orderInCategory="200"
+        android:orderInCategory="100"
         android:title="@string/action_savemeal"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_delmeal"
+        android:orderInCategory="200"
+        android:title="@string/action_delmeal"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_stashmacros"

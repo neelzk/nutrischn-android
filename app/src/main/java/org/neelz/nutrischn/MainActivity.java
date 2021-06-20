@@ -29,6 +29,9 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
     int m_protein, m_fat, m_carbs;
 
     boolean m_valuesChanged = false;
+    boolean m_yamlChanged = false;
+
+    File m_yamlFile = null;
 
     private class MealValues {
         String name;
@@ -79,10 +85,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         File docDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-        File file = new File(docDir, "nutvalues.yaml");
+        m_yamlFile = new File(docDir, "nutvalues.yaml");
         String json = "";
         try {
-            FileInputStream fis = new FileInputStream(file);
+            FileInputStream fis = new FileInputStream(m_yamlFile);
             json = new Yaml().load(fis).toString();
         } catch (FileNotFoundException e) {
             json = "[{\"n\":\"Hafer\",\"f\":\"7.0\",\"c\":\"58.7\",\"p\":\"13.5\"},{\"n\":\"Nuss\",\"f\":\"57\",\"c\":\"10\",\"p\":\"16\"},{\"n\":\"Kartoffeln\",\"f\":\"0.1\",\"c\":\"15.5\",\"p\":\"2.0\"},{\"n\":\"Batate\",\"f\":\"0.6\",\"c\":\"22\",\"p\":\"1.7\"},{\"n\":\"Moehre\",\"f\":\"0.2\",\"c\":\"4.8\",\"p\":\"1.0\"},{\"n\":\"Banane\",\"f\":\"0.1\",\"c\":\"14.3\",\"p\":\"0.8\"},{\"n\":\"Oliven\",\"f\":\"16\",\"c\":\"0.5\",\"p\":\"1.0\"},{\"n\":\"Reis\",\"f\":\"1.0\",\"c\":\"77.3\",\"p\":\"7.3\"},{\"n\":\"Chiasamen\",\"f\":\"33.3\",\"c\":\"0.33\",\"p\":\"21.6\"},{\"n\":\"Leinsamen\",\"f\":\"31.0\",\"c\":\"0.0\",\"p\":\"22.0\"},{\"n\":\"Rosinen\",\"f\":\"0.5\",\"c\":\"70\",\"p\":\"2.5\"},{\"n\":\"Eier\",\"f\":\"9.8\",\"c\":\"0.1\",\"p\":\"11.5\"},{\"n\":\"Kakao\",\"f\":\"20\",\"c\":\"8.0\",\"p\":\"20\"},{\"n\":\"Kokos\",\"f\":\"65.2\",\"c\":\"8.4\",\"p\":\"7.4\"},{\"n\":\"Hanfprotein\",\"f\":\"5.9\",\"c\":\"8.5\",\"p\":\"41.9\"},{\"n\":\"Quinoapops\",\"f\":\"5.2\",\"c\":\"68.0\",\"p\":\"13.0\"},{\"n\":\"Whey\",\"f\":\"5.8\",\"c\":\"3.8\",\"p\":\"76.2\"}]";
@@ -208,7 +214,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    Log.d(logTag, "Edit done");
                     calcTempCalories();
                 }
                 return false;
@@ -229,6 +234,19 @@ public class MainActivity extends AppCompatActivity {
         if (m_valuesChanged) {
             saveValues();
         }
+        if (m_yamlChanged) {
+            byte[] yaml = buildYaml().getBytes();
+
+//            Log.d(logTag, "Trying to write to " + m_yamlFile);
+            try {
+                new FileOutputStream(m_yamlFile).write(yaml);
+                m_yamlChanged = false;
+            } catch (FileNotFoundException fnfe) {
+                Toast.makeText(this, "Datei nicht gefunden", Toast.LENGTH_LONG).show();
+            } catch (IOException ioe) {
+                Toast.makeText(this, "Fehler beim Schreiben in Datei", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
@@ -242,6 +260,9 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_savemeal:
                 saveMeal();
+                return true;
+            case R.id.action_delmeal:
+                delMeal();
                 return true;
             case R.id.action_stashmacros:
                 stashMacros();
@@ -270,7 +291,6 @@ public class MainActivity extends AppCompatActivity {
         String carbsEnteredStr = edNewCarbs.getText().toString();
 
         if (proteinEnteredStr.equals("0") && fatEnteredStr.equals("0") && carbsEnteredStr.equals("0")) {
-            Log.d(logTag, "entered = 0");
             return;
         }
 
@@ -385,14 +405,31 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        for (MealValues mv : m_mealValues) {
+            if (mv.name.equals(newMealName)) {
+                return;
+            }
+        }
+
         newMv.name = newMealName;
         newMv.fat = edNewFat.getText().toString();
         newMv.carbs = edNewCarbs.getText().toString();
         newMv.protein = edNewProtein.getText().toString();
 
         m_mealValues.add(newMv);
+        m_yamlChanged = true;
+    }
 
-        Log.d(logTag, buildYaml());
+    private void delMeal() {
+        String mealToDel = edName.getText().toString();
+        for (MealValues mv : m_mealValues) {
+            if (mv.name.equals(mealToDel)) {
+                Toast.makeText(this, mealToDel + " gelöscht.", Toast.LENGTH_LONG).show();
+                m_mealValues.remove(mv);
+                m_yamlChanged = true;
+                break;
+            }
+        }
     }
 
     private void stashMacros() {
