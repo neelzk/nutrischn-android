@@ -147,6 +147,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.btn_delete).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                clearValues();
+            }
+        });
         View.OnClickListener edMacroClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -234,9 +240,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_reset:
-                clearValues();
-                return true;
             case R.id.action_savemeal:
                 saveMeal();
                 return true;

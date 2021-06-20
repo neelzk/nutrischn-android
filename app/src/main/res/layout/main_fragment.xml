@@ -29,25 +29,31 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
-                android:id="@+id/btn_selectmeal"
+                android:id="@+id/btn_delete"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
-                android:layout_marginStart="36dp"
+                android:layout_marginEnd="36dp"
                 android:background="@android:drawable/menuitem_background"
-                android:src="@drawable/ic_playlist_add_black_24dp"
+                android:src="@android:drawable/ic_menu_delete"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.35"
-                app:layout_constraintStart_toStartOf="@id/toolbar"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/btn_trackmeal"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
-                android:layout_marginStart="36dp"
                 android:background="@android:drawable/menuitem_background"
                 android:src="@drawable/ic_add_circle_outline_black_24dp"
-                app:layout_constraintStart_toEndOf="@id/btn_selectmeal"
+                app:layout_constraintEnd_toStartOf="@id/btn_delete"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/btn_selectmeal"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@android:drawable/menuitem_background"
+                android:src="@drawable/ic_playlist_add_black_24dp"
+                app:layout_constraintEnd_toStartOf="@id/btn_trackmeal"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

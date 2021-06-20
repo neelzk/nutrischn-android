@@ -3,11 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="org.neelz.nutrischn.MainActivity">
     <item
-        android:id="@+id/action_reset"
-        android:orderInCategory="100"
-        android:title="@string/action_reset"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/action_savemeal"
         android:orderInCategory="200"
         android:title="@string/action_savemeal"
