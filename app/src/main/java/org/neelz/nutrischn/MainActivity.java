@@ -31,8 +31,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private final String logTag = "NutrischnTag";
@@ -52,27 +50,12 @@ public class MainActivity extends AppCompatActivity {
     // macros in grams
     int m_protein, m_fat, m_carbs;
 
-    boolean m_valuesChanged = false;
+    boolean m_dailyMacrosChanged = false;
     boolean m_yamlChanged = false;
 
     File m_yamlFile = null;
 
-    private class MealValues {
-        String name;
-        String fat;
-        String carbs;
-        String protein;
-    }
-
-    ArrayList<MealValues> m_mealValues;
-
-    private CharSequence[] getMealNames() {
-        CharSequence[] ret = new CharSequence[m_mealValues.size()];
-        for (int i = 0; i < m_mealValues.size(); ++i) {
-            ret[i] = m_mealValues.get(i).name;
-        }
-        return ret;
-    }
+    MealManager m_mealValues;
 
     int m_mealChoice = -1;
 
@@ -96,32 +79,22 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             JSONArray mealsJson = new JSONArray(json);
-            m_mealValues = new ArrayList<MealValues>();
+            m_mealValues = new MealManager();
 
             for (int i = 0; i < mealsJson.length(); ++i) {
-                MealValues mv = new MealValues();
                 JSONObject mealObj = mealsJson.getJSONObject(i);
+                String name = "";
+                String fat = "0.0";
+                String carbs = "0.0";
+                String protein = "0.0";
                 try {
-                    mv.name = mealObj.getString("n");
-                } catch (JSONException e5) {
-                    mv.name = "Unkown";
+                    name = mealObj.getString("n");
+                    fat = mealObj.getString("f");
+                    carbs = mealObj.getString("c");
+                    protein = mealObj.getString("p");
+                } catch (JSONException e) {
                 }
-                try {
-                    mv.fat = mealObj.getString("f");
-                } catch (JSONException e2) {
-                    mv.fat = "0.0";
-                }
-                try {
-                    mv.carbs = mealObj.getString("c");
-                } catch (JSONException e3) {
-                    mv.carbs = "0.0";
-                }
-                try {
-                    mv.protein = mealObj.getString("p");
-                } catch (JSONException e4) {
-                    mv.protein = "0.0";
-                }
-                m_mealValues.add(mv);
+                m_mealValues.add(name, fat, carbs, protein);
             }
         } catch (JSONException e) {
         }
@@ -210,7 +183,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         edMenge.setOnEditorActionListener(new EditText.OnEditorActionListener() {
-
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -231,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        if (m_valuesChanged) {
+        if (m_dailyMacrosChanged) {
             saveValues();
         }
         if (m_yamlChanged) {
@@ -303,15 +275,15 @@ public class MainActivity extends AppCompatActivity {
         // multiply by 10 to get from milligrams to grams per 100 grams
         try {
             fat_entered += Double.parseDouble(fatEnteredStr) * menge * 10.0;
-            result += "F: " + String.format("%.1f", ((double) fat_entered) / 1000.0);
-
             carbs_entered += Double.parseDouble(carbsEnteredStr) * menge * 10.0;
-            result += "  C: " + String.format("%.1f", ((float) carbs_entered) / 1000.0);
-
             protein_entered += Double.parseDouble(proteinEnteredStr) * menge * 10.0;
+
+            result += "F: " + String.format("%.1f", ((double) fat_entered) / 1000.0);
+            result += "  C: " + String.format("%.1f", ((float) carbs_entered) / 1000.0);
             result += "  P: " + String.format("%.1f", ((float) protein_entered) / 1000.0);
 
         } catch (NumberFormatException e) {
+            return;
         }
 
         int kCal = ((protein_entered + carbs_entered) * 4 + fat_entered * 9) / 1000;
@@ -377,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
         edActualCarbs.setText("" + carbsGrams + "," + String.format("%03d", carbsRemainingMillis));
         edActualProtein.setText("" + proteinGrams + "," + String.format("%03d", proteinRemainingMillis));
         edActualkCal.setText("" + kCal);
-        m_valuesChanged = true;
+        m_dailyMacrosChanged = true;
     }
 
     private void clearValues() {
@@ -399,36 +371,19 @@ public class MainActivity extends AppCompatActivity {
         edNewCarbs.clearFocus();
         edNewProtein.clearFocus();
 
-        MealValues newMv = new MealValues();
         String newMealName = edName.getText().toString();
         if (newMealName.isEmpty()) {
             return;
         }
 
-        for (MealValues mv : m_mealValues) {
-            if (mv.name.equals(newMealName)) {
-                return;
-            }
+        if (m_mealValues.add(newMealName, edNewFat.getText().toString(), edNewCarbs.getText().toString(), edNewProtein.getText().toString())) {
+            m_yamlChanged = true;
         }
-
-        newMv.name = newMealName;
-        newMv.fat = edNewFat.getText().toString();
-        newMv.carbs = edNewCarbs.getText().toString();
-        newMv.protein = edNewProtein.getText().toString();
-
-        m_mealValues.add(newMv);
-        m_yamlChanged = true;
     }
 
     private void delMeal() {
-        String mealToDel = edName.getText().toString();
-        for (MealValues mv : m_mealValues) {
-            if (mv.name.equals(mealToDel)) {
-                Toast.makeText(this, mealToDel + " gelöscht.", Toast.LENGTH_LONG).show();
-                m_mealValues.remove(mv);
-                m_yamlChanged = true;
-                break;
-            }
+        if (m_mealValues.remove(edName.getText().toString())) {
+            m_yamlChanged = true;
         }
     }
 
@@ -461,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String buildYaml() {
         String resYaml = "";
-        for (MealValues mv : m_mealValues) {
+        for (MealManager.Macros mv : m_mealValues.m_macros) {
             resYaml += "- 'n': " + mv.name + "\n";
             resYaml += "  f: '" + mv.fat + "'\n";
             resYaml += "  c: '" + mv.carbs + "'\n";
@@ -474,7 +429,7 @@ public class MainActivity extends AppCompatActivity {
     private void onSelectMealClicked() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        builder.setSingleChoiceItems(getMealNames(), -1, new DialogInterface.OnClickListener() {
+        builder.setSingleChoiceItems(m_mealValues.getMealNames(), -1, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, final int id) {
                 m_mealChoice = id;
@@ -485,10 +440,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, final int id) {
                 if (m_mealChoice != -1) {
-                    edName.setText(m_mealValues.get(m_mealChoice).name);
-                    edNewFat.setText(m_mealValues.get(m_mealChoice).fat);
-                    edNewCarbs.setText(m_mealValues.get(m_mealChoice).carbs);
-                    edNewProtein.setText(m_mealValues.get(m_mealChoice).protein);
+                    edName.setText(m_mealValues.m_macros.get(m_mealChoice).name);
+                    edNewFat.setText(m_mealValues.m_macros.get(m_mealChoice).fat);
+                    edNewCarbs.setText(m_mealValues.m_macros.get(m_mealChoice).carbs);
+                    edNewProtein.setText(m_mealValues.m_macros.get(m_mealChoice).protein);
                 }
             }
         });
@@ -514,7 +469,6 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt("carbs", m_carbs);
         editor.putInt("protein", m_protein);
         editor.apply();
-        m_valuesChanged = false;
+        m_dailyMacrosChanged = false;
     }
-
 }
