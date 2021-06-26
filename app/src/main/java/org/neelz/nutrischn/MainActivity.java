@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
     // macros in grams
     int m_protein, m_fat, m_carbs;
 
-    boolean m_dailyMacrosChanged = false;
     boolean m_yamlChanged = false;
 
     File m_yamlFile = null;
@@ -203,9 +202,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        if (m_dailyMacrosChanged) {
-            saveValues();
-        }
+
+        saveValues();
+
         if (m_yamlChanged) {
             byte[] yaml = buildYaml().getBytes();
 
@@ -349,7 +348,6 @@ public class MainActivity extends AppCompatActivity {
         edActualCarbs.setText("" + carbsGrams + "," + String.format("%03d", carbsRemainingMillis));
         edActualProtein.setText("" + proteinGrams + "," + String.format("%03d", proteinRemainingMillis));
         edActualkCal.setText("" + kCal);
-        m_dailyMacrosChanged = true;
     }
 
     private void clearValues() {
@@ -469,6 +467,5 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt("carbs", m_carbs);
         editor.putInt("protein", m_protein);
         editor.apply();
-        m_dailyMacrosChanged = false;
     }
 }

@@ -52,9 +52,9 @@ class MealManager {
     CharSequence[] getMealNames() {
         if (m_namesChanged) {
             m_names = new CharSequence[m_macros.size()];
-        }
-        for (int i = 0; i < m_macros.size(); ++i) {
-            m_names[i] = m_macros.get(i).name;
+            for (int i = 0; i < m_macros.size(); ++i) {
+                m_names[i] = m_macros.get(i).name;
+            }
         }
         m_namesChanged = false;
         return m_names;
